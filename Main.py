@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib as plt
-import MnistDataloader
+import DataLoader
 
 def main(args):
     print("?")
