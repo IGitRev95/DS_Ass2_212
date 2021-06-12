@@ -35,11 +35,10 @@ class MnistDataloader(object):
                 raise ValueError('Magic number mismatch, expected 2051, got {}'.format(magic))
             image_data = array("B", file.read())
         images = []
-        # TODO size change to ran on a fewer list than th whole
-        # for i in range(size):
+
         for i in range(size):
             images.append([0] * rows * cols)
-        # for i in range(size):
+
         for i in range(size):
             img = np.array(image_data[i * rows * cols:(i + 1) * rows * cols])
             img = img.reshape(28, 28)
@@ -85,7 +84,7 @@ def show_images(images, title_texts):
         title_text = x[1]
         plt.subplot(rows, cols, index)
         plt.imshow(image, cmap=plt.cm.gray)
-        if (title_text != ''):
+        if title_text != '':
             plt.title(title_text, fontsize=15);
         index += 1
     plt.show()
@@ -103,16 +102,16 @@ mnist_dataloader = MnistDataloader(training_images_filepath, training_labels_fil
 #
 
 
-# images_2_show = []
-# titles_2_show = []
-# for i in range(0, 10):
-#     r = random.randint(1, 60000)
-#     images_2_show.append(x_train[r])
-#     titles_2_show.append('training image [' + str(r) + '] = ' + str(y_train[r]))
-#
-# for i in range(0, 5):
-#     r = random.randint(1, 10000)
-#     images_2_show.append(x_test[r])
-#     titles_2_show.append('test image [' + str(r) + '] = ' + str(y_test[r]))
-#
-# show_images(images_2_show, titles_2_show)
+images_2_show = []
+titles_2_show = []
+for i in range(0, 10):
+    r = random.randint(1, 60000)
+    images_2_show.append(x_train[r])
+    titles_2_show.append('training image [' + str(r) + '] = ' + str(y_train[r]))
+
+for i in range(0, 5):
+    r = random.randint(1, 10000)
+    images_2_show.append(x_test[r])
+    titles_2_show.append('test image [' + str(r) + '] = ' + str(y_test[r]))
+
+show_images(images_2_show, titles_2_show)

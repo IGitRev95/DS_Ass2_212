@@ -1,37 +1,38 @@
 import numpy as np
-import struct
-from array import array
 from os.path import join
 import os
-import random
-import matplotlib.pyplot as plt
 import DataLoader
 
 
 def main():
     (image_train_list, label_train_list), (image_test_list, label_test_list) = retrieve_data()
-    # TODO change reshape size from 200 to 60000
+    # reshaping the data stream for flattening the images matrices
+    # 60000 mat 28X28 -> 60000 vector in size 28**2
     image_train_normalize = np.array(image_train_list).reshape(60000, 28 ** 2)
-    image_with_label_list_train = [[label_train_list[i], image_train_normalize[i]] for i in range(60000)]
-    laybeled_centers = kmeans(10, image_with_label_list_train)
-
-    # TODO change reshape size from 200 to 60000
+    image_with_label_list_train = [[label_train_list[i], image_train_normalize[i]] for i in
+                                   range(len(label_train_list))]
     image_test_normalize = np.array(image_test_list).reshape(10000, 28 ** 2)
-    image_with_label_list_test = [[label_test_list[i], image_test_normalize[i]] for i in range(10000)]
+    image_with_label_list_test = [[label_test_list[i], image_test_normalize[i]] for i in range(len(label_test_list))]
 
-    testing_kmeans(laybeled_centers, image_with_label_list_test)
+    # kmeans returns the clusters centers bounded to their common label
+    labeled_centers = random_init_kmeans(10, image_with_label_list_train)
+
+    testing_kmeans(labeled_centers, image_with_label_list_test)
+
+    labeled_centers = non_random_init_kmeans(10, image_with_label_list_train)
+
+    testing_kmeans(labeled_centers, image_with_label_list_test)
 
 
-def kmeans(k, image_with_label_list):
+def random_init_kmeans(k, image_with_label_list):
     # initialize k random clusters, assigned with empty sets
     centers_array = [[x, []] for x in np.random.rand(k, 28 ** 2)]  # array of [center,bounded images]
-    # centers_array = [[look_for_label(x, image_with_label_list), []] for x in
-    #                  range(10)]  # array of [center,bounded images]
-    counter = 0
+    iteration_counter = 0
+    cur_centers = [center[0] for center in centers_array]  # will keep current centers for comparison
+
     while True:
-        counter = counter + 1
-        print("iteration number {}\n".format(counter))
-        cur_centers = [center[0] for center in centers_array]
+        iteration_counter = iteration_counter + 1
+        print("iteration number {}\n".format(iteration_counter))
 
         #  Assigning step
         for image in image_with_label_list:
@@ -42,62 +43,83 @@ def kmeans(k, image_with_label_list):
         for cluster in filter(lambda claster: len(claster[1]) > 0, centers_array):
             image_pool = [img[0][1] for img in cluster[1]]  # extracting all assigned images values
             cluster[0] = np.average(image_pool, axis=0)  # compute the average vector to be the new center
-
-        if np.array_equal(cur_centers, [center[0] for center in centers_array]):
+        new_centers = [center[0] for center in centers_array]
+        #  check if the centers have changed in the past iteration - termination condition
+        if np.array_equal(cur_centers, new_centers):
             break
 
-        #  Assigning reset
+        cur_centers = new_centers  # keeping current centers for comparison
+
+        #  Images to clusters assigning reset
         for cluster in centers_array:
             cluster[1] = []
 
-    return [[common_label(cluster), cluster[0]] for cluster in centers_array]
+    return [[common_label(cluster), cluster[0]] for cluster in centers_array]  # returns [label, cluster]
 
 
-def testing_kmeans(laybeled_centers, image_with_label_list):
-    centers_array = [[x[1], x[0]] for x in laybeled_centers]
-    succes_counter = 0
+def non_random_init_kmeans(k, image_with_label_list, random_init):
+    # initialize clusters with concrete sample of each cluster class, assigned with empty sets
+    centers_array = [[look_for_label(x, image_with_label_list), []] for x in
+                     range(10)]  # array of [center,bounded images]
+    iteration_counter = 0
+    cur_centers = [center[0] for center in centers_array]  # will keep current centers for comparison
+
+    while True:
+        iteration_counter = iteration_counter + 1
+        print("iteration number {}\n".format(iteration_counter))
+
+        #  Assigning step
+        for image in image_with_label_list:
+            centers_array[find_closest_center_index(centers_array, image[1])][1].append([image])
+            # assign image to closest center
+
+        #  Centers updating step
+        for cluster in filter(lambda claster: len(claster[1]) > 0, centers_array):
+            image_pool = [img[0][1] for img in cluster[1]]  # extracting all assigned images values
+            cluster[0] = np.average(image_pool, axis=0)  # compute the average vector to be the new center
+        new_centers = [center[0] for center in centers_array]
+        #  check if the centers have changed in the past iteration - termination condition
+        if np.array_equal(cur_centers, new_centers):
+            break
+
+        cur_centers = new_centers  # keeping current centers for comparison
+
+        #  Images to clusters assigning reset
+        for cluster in centers_array:
+            cluster[1] = []
+
+    return [[common_label(cluster), cluster[0]] for cluster in centers_array]  # returns [label, cluster]
+
+
+def testing_kmeans(labeled_centers, image_with_label_list):
+    centers_array = [[x[1], x[0]] for x in labeled_centers]  # make an centers - labels array
+    success_counter = 0
     fail_counter = 0
-    #  Assigning step
+    #  Assigning step like, each comparing the assigned image label to the cluster pre-given label by the k-means
     for image in image_with_label_list:
         if centers_array[find_closest_center_index(centers_array, image[1])][1] == image[0]:
-            succes_counter = succes_counter + 1
+            success_counter = success_counter + 1
         else:
             fail_counter = fail_counter + 1
-    print("suc: {}, fail: {} ,precentage: {}".format(succes_counter, fail_counter,
-                                                     succes_counter / len(image_with_label_list)))
+    print("suc: {}, fail: {} ,success rate: {}".format(success_counter, fail_counter,
+                                                       success_counter / len(image_with_label_list)))
 
 
-def look_for_label(label, data_set):
-    for img in data_set:
+def look_for_label(label, image_set):
+    for img in image_set:
         if img[0] == label:
             return img[1]
 
-
+#  Looking for the common label in a cluster
 def common_label(cluster):
     label_pool = [img[0][0] for img in cluster[1]]  # extracting all assigned images values
-    return np.bincount(label_pool).argmax()
-    # print(np.argmax(counts))
+    return np.bincount(label_pool).argmax()  # counting and returning the common label
 
 
 def find_closest_center_index(center_array, data_unit):
-    centers = map(lambda center_set_tuple: center_set_tuple[0], center_array)
-    distances = map(lambda cent: np.linalg.norm(data_unit - cent), centers)
-    x = [np.linalg.norm(data_unit - center) for center in centers]
-    return np.argmin(x)
-
-    # images_2_show = []
-    # titles_2_show = []
-    # for i in range(0, 10):
-    #     r = random.randint(1, 60000)
-    #     images_2_show.append(x_train[r])
-    #     titles_2_show.append('training image [' + str(r) + '] = ' + str(y_train[r]))
-    #
-    # # for i in range(0, 5):
-    # #     r = random.randint(1, 10000)
-    # #     images_2_show.append(x_test[r])
-    # #     titles_2_show.append('test image [' + str(r) + '] = ' + str(y_test[r]))
-    #
-    # DataLoader.show_images(images_2_show, titles_2_show)
+    centers = map(lambda center_set_tuple: center_set_tuple[0], center_array)  # extract current centers
+    x = [np.linalg.norm(data_unit - center) for center in centers]  # compute norm distance from each center
+    return np.argmin(x)  # return the index of the closest center
 
 
 def retrieve_data():
