@@ -37,10 +37,10 @@ class MnistDataloader(object):
         images = []
         # TODO size change to ran on a fewer list than th whole
         # for i in range(size):
-        for i in range(200):
+        for i in range(1000):
             images.append([0] * rows * cols)
         # for i in range(size):
-        for i in range(200):
+        for i in range(1000):
             img = np.array(image_data[i * rows * cols:(i + 1) * rows * cols])
             img = img.reshape(28, 28)
             # meanval = np.mean(img)

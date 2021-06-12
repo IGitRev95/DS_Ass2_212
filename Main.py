@@ -11,33 +11,55 @@ import DataLoader
 def main():
     (image_train_list, label_train_list) = retrieve_necessary_data()
     # TODO change reshape size from 200 to 60000
-    image_train_normalize = np.array(image_train_list).reshape(200, 28 ** 2)
-    image_with_label_list = [[label_train_list[i],image_train_normalize[i]] for i in range(200)]
+    image_train_normalize = np.array(image_train_list).reshape(1000, 28 ** 2)
+    image_with_label_list = [[label_train_list[i], image_train_normalize[i]] for i in range(1000)]
     kmeans(10, image_with_label_list)
 
 
 def kmeans(k, image_with_label_list):
     # initialize k random clusters, assigned with empty sets
     centers_array = [[x, []] for x in np.random.rand(k, 28 ** 2)]  # array of [center,bounded images]
-    for image in image_with_label_list:
-        centers_array[find_closest_center_index(centers_array, image[1])][1].append([image])
-        # bound image to closest center
+    counter = 0
+    while counter < 50:
+        counter = counter + 1
+        print("iteration number {}\n".format(counter))
+        cur_centers = [center[0] for center in centers_array]
 
-    # for cluster in centers_array.filter():
-    #     image_pool = map(lambda image_with_label: image_with_label[1], cluster[1])
-    #     cluster
+        #  Assigning step
+        for image in image_with_label_list:
+            centers_array[find_closest_center_index(centers_array, image[1])][1].append([image])
+            # assign image to closest center
+
+        #  Centers updating step
+        for cluster in filter(lambda claster: len(claster[1]) > 0, centers_array):
+            image_pool = [img[0][1] for img in cluster[1]]  # extracting all assigned images values
+            cluster[0] = np.average(image_pool, axis=0)  # compute the average vector to be the new center
+
+        if np.array_equal(cur_centers, [center[0] for center in centers_array]):
+            break
+
+        #  Assigning reset
+        for cluster in centers_array:
+            cluster[1] = []
+
+    for cluster in filter(lambda claster: len(claster[1]) > 0, centers_array):
+        print(common_label(cluster))
 
 
 
-    print(centers_array)
+    # print(centers_array)
 
 
+def common_label(cluster):
+    label_pool = [img[0][0] for img in cluster[1]]  # extracting all assigned images values
+    return np.bincount(label_pool).argmax()
+    # print(np.argmax(counts))
 
 
 def find_closest_center_index(center_array, data_unit):
     centers = map(lambda center_set_tuple: center_set_tuple[0], center_array)
     distances = map(lambda cent: np.linalg.norm(data_unit - cent), centers)
-    x = [np.linalg.norm(data_unit-center) for center in centers]
+    x = [np.linalg.norm(data_unit - center) for center in centers]
     return np.argmin(x)
 
     # images_2_show = []
