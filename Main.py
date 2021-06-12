@@ -9,24 +9,21 @@ import DataLoader
 
 
 def main():
-    (x_train, y_train) = retrieveNecessaryData()
+    (image_train, label_train) = retrieveNecessaryData()
 
-
-
-
-    images_2_show = []
-    titles_2_show = []
-    for i in range(0, 10):
-        r = random.randint(1, 60000)
-        images_2_show.append(x_train[r])
-        titles_2_show.append('training image [' + str(r) + '] = ' + str(y_train[r]))
-
-    # for i in range(0, 5):
-    #     r = random.randint(1, 10000)
-    #     images_2_show.append(x_test[r])
-    #     titles_2_show.append('test image [' + str(r) + '] = ' + str(y_test[r]))
-
-    DataLoader.show_images(images_2_show, titles_2_show)
+    # images_2_show = []
+    # titles_2_show = []
+    # for i in range(0, 10):
+    #     r = random.randint(1, 60000)
+    #     images_2_show.append(x_train[r])
+    #     titles_2_show.append('training image [' + str(r) + '] = ' + str(y_train[r]))
+    #
+    # # for i in range(0, 5):
+    # #     r = random.randint(1, 10000)
+    # #     images_2_show.append(x_test[r])
+    # #     titles_2_show.append('test image [' + str(r) + '] = ' + str(y_test[r]))
+    #
+    # DataLoader.show_images(images_2_show, titles_2_show)
 
 
 def retrieveNecessaryData():

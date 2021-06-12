@@ -101,7 +101,6 @@ mnist_dataloader = MnistDataloader(training_images_filepath, training_labels_fil
 #
 
 
-
 # images_2_show = []
 # titles_2_show = []
 # for i in range(0, 10):
