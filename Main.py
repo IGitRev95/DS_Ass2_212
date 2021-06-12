@@ -57,7 +57,7 @@ def random_init_kmeans(k, image_with_label_list):
     return [[common_label(cluster), cluster[0]] for cluster in centers_array]  # returns [label, cluster]
 
 
-def non_random_init_kmeans(k, image_with_label_list, random_init):
+def non_random_init_kmeans(k, image_with_label_list):
     # initialize clusters with concrete sample of each cluster class, assigned with empty sets
     centers_array = [[look_for_label(x, image_with_label_list), []] for x in
                      range(10)]  # array of [center,bounded images]
