@@ -9,7 +9,7 @@ import DataLoader
 
 
 def main():
-    (image_train, label_train) = retrieveNecessaryData()
+    (image_train, label_train) = retrieve_necessary_data()
 
     # images_2_show = []
     # titles_2_show = []
@@ -26,7 +26,7 @@ def main():
     # DataLoader.show_images(images_2_show, titles_2_show)
 
 
-def retrieveNecessaryData():
+def retrieve_necessary_data():
     cwd = os.getcwd()
     input_path = cwd + '\\MNIST'
     training_images_filepath = join(input_path, 'train-images-idx3-ubyte\\train-images.idx3-ubyte')
