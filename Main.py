@@ -110,15 +110,19 @@ def look_for_label(label, image_set):
         if img[0] == label:
             return img[1]
 
+
 #  Looking for the common label in a cluster
 def common_label(cluster):
+    if len(cluster[1]) == 0:
+        return -1  # default value for a cluster which no image was assigned to
     label_pool = [img[0][0] for img in cluster[1]]  # extracting all assigned images values
     return np.bincount(label_pool).argmax()  # counting and returning the common label
 
 
 def find_closest_center_index(center_array, data_unit):
     centers = map(lambda center_set_tuple: center_set_tuple[0], center_array)  # extract current centers
-    x = [np.linalg.norm(data_unit - center) for center in centers]  # compute norm distance from each center
+    squared_norm = lambda x: np.inner(x, x)
+    x = [squared_norm(data_unit - center) for center in centers]  # compute norm distance from each center
     return np.argmin(x)  # return the index of the closest center
 
 
